@@ -16,9 +16,9 @@ contract MysteryBoxToken is ERC20, Ownable {
 
     using ECDSA for bytes32;
 
-    uint256 startingTime;
-    uint256 endingTime;
-    uint256 duration;
+    uint256 public startingTime;
+    uint256 public endingTime;
+    uint256 public duration;
     bool public saleOn = true;
     mapping(address => bool) public discountClaimed;
 
@@ -45,23 +45,17 @@ contract MysteryBoxToken is ERC20, Ownable {
         return 0;
     }
 
-//    //@YU: This function read from an updatable jason file, in the file you can get un int from an adress.
-//    function checkIfWhitelisted(address _to) public view virtual returns (uint8){
-//        //from the jason file we get amount from 1 to 100, this represent the discount of the adress _to can enjoy.
-//        return(50);
-//    }
-
 
     //@YU: This function gives the price now
     function getMintingPrice() public view virtual returns (uint256) {
         //The percentage of time passed
-        uint256 timePassed = 100-(endingTime - block.timestamp) * 100 / duration;
-        uint256 priceNow = 2e17 + 3e17 * timePassed /100;
-        return(priceNow / 100);
+        uint256 percentageTimePassed = (block.timestamp - startingTime) * 100 / duration;
+        return 2e17 + 3e17 * percentageTimePassed / 100;
     }
 
     //front end get minting price () first then put the price in to payable parameter
-    function mint() public payable{
+    function mint() external payable {
+        require(block.timestamp < endingTime, "Sale has expired");
         require(msg.value >= getMintingPrice());
         //after the transfer of eth mint token.
         _mint(msg.sender, 1);
@@ -70,9 +64,10 @@ contract MysteryBoxToken is ERC20, Ownable {
 
     function mintDiscount(uint256 _discount, bytes memory _signature) external payable isDiscountAuthorized(_discount, _signature) {
         require(saleOn == true, "Sale is Off");
+        require(block.timestamp < endingTime, "Sale has expired");
         require(!discountClaimed[msg.sender], "caller already used his discount");
         require(_discount > 0 && _discount < 100, "discount must be between 0 and 100");
-        require(msg.value >= getMintingPrice() * _discount / 100, "missing ETH");
+        require(msg.value >= getMintingPrice() * (100 - _discount) / 100, "missing ETH");
         _mint(msg.sender, 1);
         discountClaimed[msg.sender] = true;
     }

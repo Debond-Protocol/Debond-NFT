@@ -9,10 +9,6 @@ import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 
 contract MysteryBoxToken is ERC20, Ownable {
 
-//    struct SaleConfig {
-//        uint256 startTime;
-//        uint256 duration;
-//    }
 
     using ECDSA for bytes32;
 
@@ -86,26 +82,5 @@ contract MysteryBoxToken is ERC20, Ownable {
         require(_amount > 0, "No ETH to Withdraw");
         payable(_msgSender()).transfer(_amount);
     }
-
-//    function getPrice() public view returns (uint256) {
-//        uint256 _price;
-//        SaleConfig memory _saleConfig = saleConfig;
-//        if (block.timestamp <= _saleConfig.startTime + 6 hours) {
-//            _price = 0.5 ether;
-//        } else if (
-//            (block.timestamp >= _saleConfig.startTime + 6 hours) &&
-//            (block.timestamp <= _saleConfig.startTime + 12 hours)
-//        ) {
-//            _price = 0.4 ether;
-//        } else if (
-//            (block.timestamp > _saleConfig.startTime + 12 hours) &&
-//            (block.timestamp <= _saleConfig.startTime + 18 hours)
-//        ) {
-//            _price = 0.3 ether;
-//        } else {
-//            _price = 0.3 ether;
-//        }
-//        return _price;
-//    }
 
 }

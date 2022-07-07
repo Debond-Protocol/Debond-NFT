@@ -4,7 +4,7 @@ import {MysteryBoxTokenInstance} from "../types/truffle-contracts";
 
 export interface AirdropModel {
     address: string,
-    quantity: string,
+    discount: string,
     signature: string,
 }
 
@@ -16,7 +16,7 @@ const MysteryBoxToken = artifacts.require("MysteryBoxToken");
  */
 
 contract('Airdrop', async (accounts: string[]) => {
-    let MysteryBoxTokenContract: MysteryBoxTokenInstance;
+    let mysteryBoxTokenInstance: MysteryBoxTokenInstance;
 
     const [owner, claimer1, claimer2, claimer3, claimer4, claimerNotAuth]: string[] = accounts
 
@@ -24,26 +24,26 @@ contract('Airdrop', async (accounts: string[]) => {
     const privateKey = Object.values(keys.private_keys)[0] as string
     const wallet = new ethers.Wallet(privateKey);
 
-    const amount = "40"
+    const discount = "40"
 
     let airdrops: AirdropModel[];
 
 
     it('Initialisation', async () => {
-        MysteryBoxTokenContract = await MysteryBoxToken.deployed();
+        mysteryBoxTokenInstance = await MysteryBoxToken.deployed();
 
-        const airdropAddress = MysteryBoxTokenContract.address;
+        const airdropAddress = mysteryBoxTokenInstance.address;
         airdrops = [
-            {address: claimer1, quantity: amount, signature: ""},
-            {address: claimer2, quantity: amount, signature: ""},
-            {address: claimer3, quantity: amount, signature: ""},
-            {address: claimer4, quantity: amount, signature: ""},
+            {address: claimer1, discount: discount, signature: ""},
+            {address: claimer2, discount: discount, signature: ""},
+            {address: claimer3, discount: discount, signature: ""},
+            {address: claimer4, discount: discount, signature: ""},
         ]
 
         airdrops = await Promise.all(airdrops.map(async (airdrop) => {
             const messageHash = ethers.utils.solidityKeccak256(
                 ["address", "address", "uint256"],
-                [airdropAddress, airdrop.address, parseInt(airdrop.quantity)]
+                [airdropAddress, airdrop.address, parseInt(airdrop.discount)]
             )
             let messageHashBytes = ethers.utils.arrayify(messageHash)
             airdrop.signature = await wallet.signMessage(messageHashBytes);
@@ -57,9 +57,9 @@ contract('Airdrop', async (accounts: string[]) => {
     })
 
     it('should airdrop successfully', async () => {
-        await MysteryBoxTokenContract.mintDiscount(amount, airdrops.filter(airdrop => airdrop.address == claimer1)[0].signature, {from: claimer1})
+        await mysteryBoxTokenInstance.mintDiscount(discount, airdrops.filter(airdrop => airdrop.address == claimer1)[0].signature, {from: claimer1, value: ethers.utils.parseEther("0.3").toString()})
 
-        const claimerBalance = await MysteryBoxTokenContract.balanceOf(claimer1)
-        assert.equal(claimerBalance.toString(), ethers.utils.parseEther(amount).toString())
+        const claimerBalance = await mysteryBoxTokenInstance.balanceOf(claimer1)
+        assert.equal(claimerBalance.toString(), "1")
     })
 })

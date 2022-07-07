@@ -15,15 +15,25 @@ contract MysteryBoxToken is ERC20, Ownable {
     uint256 public startingTime;
     uint256 public endingTime;
     uint256 public duration;
-    bool public saleOn = true;
+    bool public saleOn;
     mapping(address => bool) public discountClaimed;
+    bool hasStarted;
 
 
 
     constructor(string memory name_, string memory symbol_, uint _duration) ERC20(name_, symbol_){
-        startingTime = block.timestamp;
+        //        startingTime = block.timestamp;
         duration = _duration;
-        endingTime = block.timestamp + _duration;
+    }
+
+    /**
+    * @notice this function is only called once
+    */
+    function startTime() external onlyOwner {
+        require(!hasStarted);
+        startingTime = block.timestamp;
+        endingTime = block.timestamp + duration;
+        hasStarted = true;
     }
 
     modifier isDiscountAuthorized(uint256 discount, bytes memory signature) {
@@ -44,6 +54,9 @@ contract MysteryBoxToken is ERC20, Ownable {
 
     //@YU: This function gives the price now
     function getMintingPrice() public view virtual returns (uint256) {
+        if(startingTime == 0) {
+            return 2e17;
+        }
         //The percentage of time passed
         uint256 percentageTimePassed = (block.timestamp - startingTime) * 100 / duration;
         return 2e17 + 3e17 * percentageTimePassed / 100;
@@ -52,14 +65,16 @@ contract MysteryBoxToken is ERC20, Ownable {
     //front end get minting price () first then put the price in to payable parameter
     function mint(uint amount) external payable {
         require(saleOn, "Sale is off");
-        require(msg.value >= amount * getMintingPrice(), "value not enough");
+        require(msg.value >= amount * getMintingPrice());
         //after the transfer of eth mint token.
         _mint(msg.sender, amount); //todo done here
     }
 
     function mintDiscount(uint256 _discount, bytes memory _signature) external payable isDiscountAuthorized(_discount, _signature) {
         require(saleOn == true, "Sale is Off");
-        require(block.timestamp < endingTime, "Sale has expired");
+        if (endingTime != 0) {
+            require(block.timestamp < endingTime, "Sale has expired");
+        }
         require(!discountClaimed[msg.sender], "caller already used his discount");
         require(_discount > 0 && _discount < 100, "discount must be between 0 and 100");
         require(msg.value >= getMintingPrice() * (100 - _discount) / 100, "missing ETH");

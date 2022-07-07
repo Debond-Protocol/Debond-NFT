@@ -53,18 +53,18 @@ contract('Airdrop', async (accounts: string[]) => {
         console.log(airdrops);
 
         // Setting airdrop On
-        //await MysteryBoxTokenContract.setSaleOn();
+        await mysteryBoxTokenInstance.setSaleOn();
     })
 
     it('should airdrop successfully', async () => {
-        await mysteryBoxTokenInstance.mintDiscount(discount, airdrops.filter(airdrop => airdrop.address == claimer1)[0].signature, {from: claimer1, value: ethers.utils.parseEther("0.3").toString()})
+        await mysteryBoxTokenInstance.mintDiscount(discount, airdrops.filter(airdrop => airdrop.address == claimer1)[0].signature, {from: claimer1, value: ethers.utils.parseEther("0.12").toString()})
 
         const claimerBalance = await mysteryBoxTokenInstance.balanceOf(claimer1);
         assert.equal(claimerBalance.toString(), "1");
     })
 
     it('should airdrop successfully', async () => {
-        await mysteryBoxTokenInstance.mint(3, {from: claimer2, value: ethers.utils.parseEther("1.5").toString()});
+        await mysteryBoxTokenInstance.mint(3, {from: claimer2, value: ethers.utils.parseEther("0.6").toString()});
 
         const claimerBalance = await mysteryBoxTokenInstance.balanceOf(claimer2);
         assert.equal(claimerBalance.toString(), "3");

@@ -43,7 +43,7 @@ contract('Airdrop', async (accounts: string[]) => {
         airdrops = await Promise.all(airdrops.map(async (airdrop) => {
             const messageHash = ethers.utils.solidityKeccak256(
                 ["address", "address", "uint256"],
-                [airdropAddress, airdrop.address, ethers.utils.parseEther(airdrop.quantity)]
+                [airdropAddress, airdrop.address, parseInt(airdrop.quantity)]
             )
             let messageHashBytes = ethers.utils.arrayify(messageHash)
             airdrop.signature = await wallet.signMessage(messageHashBytes);

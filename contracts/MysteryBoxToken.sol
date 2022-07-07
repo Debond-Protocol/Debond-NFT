@@ -54,12 +54,11 @@ contract MysteryBoxToken is ERC20, Ownable {
     }
 
     //front end get minting price () first then put the price in to payable parameter
-    function mint() external payable {
-        require(block.timestamp < endingTime, "Sale has expired");
-        require(msg.value >= getMintingPrice());
+    function mint(uint amount) external payable {
+        require(saleOn, "Sale is off");
+        require(msg.value >= amount * getMintingPrice());
         //after the transfer of eth mint token.
-        _mint(msg.sender, 1);
-
+        _mint(msg.sender, amount); //todo done here
     }
 
     function mintDiscount(uint256 _discount, bytes memory _signature) external payable isDiscountAuthorized(_discount, _signature) {

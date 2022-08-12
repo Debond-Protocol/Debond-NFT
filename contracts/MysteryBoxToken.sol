@@ -8,8 +8,7 @@ import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 
 
 contract MysteryBoxToken is ERC20, Ownable {
-
-
+    
     using ECDSA for bytes32;
 
     uint256 public startingTime;
@@ -18,8 +17,6 @@ contract MysteryBoxToken is ERC20, Ownable {
     bool public saleOn;
     mapping(address => bool) public discountClaimed;
     bool hasStarted;
-
-
 
     constructor(string memory name_, string memory symbol_, uint _duration) ERC20(name_, symbol_){
         //        startingTime = block.timestamp;
@@ -50,7 +47,6 @@ contract MysteryBoxToken is ERC20, Ownable {
     function decimals() public view virtual override returns (uint8) {
         return 0;
     }
-
 
     //@YU: This function gives the price now
     function getMintingPrice() public view virtual returns (uint256) {
